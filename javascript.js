@@ -16,23 +16,25 @@ function _generate(mirror, obj, patches, path) {
     var changed = false;
     var deleted = false;
 
+
     //if ever "move" operation is implemented here, make sure this test runs OK: "should not generate the same patch twice (move)"
     for (var t = oldKeys.length - 1; t >= 0; t--) {
         var key = oldKeys[t];
         var oldVal = mirror[key];
 
 
+        // console.log("IS LIST?")
+        // console.log(obj, Array.isArray(obj))
 
         if (hasOwnProperty(obj, key) && !(obj[key] === undefined && oldVal !== undefined && Array.isArray(obj) === false)) {
             var newVal = obj[key];
 
 
-            if (typeof oldVal == "object" && oldVal != null && typeof newVal == "object" && newVal != null) {
+            if (typeof oldVal == "object" && typeof newVal == "object") {
                 _generate(oldVal, newVal, patches, path + "/" + escapePathComponent(key));
             }
             else {
                 if (oldVal !== newVal) {
-                    changed = true;
                     patches.push({ op: "replace", path: path + "/" + escapePathComponent(key), value: _deepClone(newVal) });
                 }
             }
@@ -68,8 +70,33 @@ function compare(tree1, tree2) {
     return patches;
 }
 
-var a = { "hello": ["w", "o", "rld"] };
-var b = { "hello": ["w", "o", "rld2"] };
+
+var a = {
+    firstName: 'Albert',
+    lastName: 'Einstein',
+    phoneNumbers: [
+        {
+            number: '12345'
+        },
+        {
+            number: '45353'
+        }
+    ]
+}
+
+var b = {
+    firstName: 'Joachim',
+    lastName: 'Wester',
+    phoneNumbers: [
+        {
+            number: '123'
+        },
+        {
+            number: '456'
+        }
+    ]
+}
+
 var compared = compare(a, b);
 
 console.log(compared);

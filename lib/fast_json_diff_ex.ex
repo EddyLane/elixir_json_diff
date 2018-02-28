@@ -1,23 +1,21 @@
 defmodule FastJsonDiffEx do
   def generate(old, new, patches \\ [], path \\ "") do
-    IO.puts("GENERATE:")
-    IO.inspect({old, new})
-    IO.inspect(patches)
-    IO.inspect(path)
+    new_keys = list_or_map_keys_or_indexes(new)
 
-    {has_deleted, patches} =
-      Enum.reduce(old, {false, patches}, fn {key, old_val}, {deleted, patches} ->
-        if is_list(new) do
-          patch = %{
-            "op" => "remove",
-            "path" => path <> "/" <> escape_path_component(key)
-          }
+    old_keys =
+      list_or_map_keys_or_indexes(old)
+      |> Enum.reverse()
 
-          {true, patches ++ [patch]}
-        else
-          new_val = Map.fetch!(new, key)
+    {deleted, patches} =
+      Enum.reduce(old_keys, {false, patches}, fn key, {deleted, patches} ->
+        IO.inspect(key)
 
-          if (is_map(old_val) || is_list(old_val)) && (is_map(new_val) || is_list(new_val)) do
+        old_val = item(old, key)
+
+        if has_key_or_index?(new, key) do
+          new_val = item(new, key)
+
+          if map_or_list?(old_val) and map_or_list?(new_val) do
             child_patches =
               generate(
                 old_val,
@@ -28,33 +26,87 @@ defmodule FastJsonDiffEx do
 
             {deleted || false, patches ++ child_patches}
           else
-            IO.puts("WOW")
-            IO.inspect(old_val)
-            IO.inspect(new_val)
-
-            patch = %{
-              "op" => "replace",
-              "path" => path <> "/" <> escape_path_component(key),
-              "value" => new_val
-            }
-
-            {deleted || false, patches ++ [patch]}
+            if new_val !== old_val do
+              {deleted || false, patches ++ [patch(:replace, path, key, new_val)]}
+            else
+              {deleted || false, patches}
+            end
           end
+        else
+          {true, patches ++ [patch(:remove, path, key)]}
         end
       end)
 
-    if !has_deleted && length(Map.keys(new)) == length(Map.keys(old)) do
+    if !deleted and length(new_keys) == length(old_keys) do
       patches
     end
 
-    patches
+    Enum.reduce(new_keys, patches, fn key, patches ->
+      if !has_key_or_index?(old, key) do
+        patches ++ [patch(:add, path, key, item(new, key))]
+      else
+        patches
+      end
+    end)
   end
 
-  defp escape_path_component(path) do
-    match_first = :binary.match(path, "/")
-    match_second = :binary.match(path, "~")
+  defp has_key_or_index?(map, key) when is_map(map) and is_binary(key) do
+    Map.has_key?(map, key)
+  end
 
-    case {match_first, match_second} do
+  defp has_key_or_index?(list, index) when is_list(list) and is_integer(index) do
+    case Enum.at(list, index) do
+      nil -> false
+      _ -> true
+    end
+  end
+
+  defp has_key_or_index?(_, _), do: false
+
+  defp patch(:add, path, key, val) do
+    %{
+      "op" => "add",
+      "path" => path <> "/" <> escape_path_component(key),
+      "value" => val
+    }
+  end
+
+  defp patch(:replace, path, key, val) do
+    %{
+      "op" => "replace",
+      "path" => path <> "/" <> escape_path_component(key),
+      "value" => val
+    }
+  end
+
+  defp patch(:remove, path, key) do
+    %{
+      "op" => "remove",
+      "path" => path <> "/" <> escape_path_component(key)
+    }
+  end
+
+  defp list_or_map_keys_or_indexes(map) when is_map(map), do: Map.keys(map)
+
+  defp list_or_map_keys_or_indexes(list) when is_list(list) do
+    0..(length(list) - 1)
+    |> Enum.to_list()
+  end
+
+  defp map_or_list?(a) when is_list(a) or is_map(a), do: true
+  defp map_or_list?(_), do: false
+
+  defp item(enum, key) when is_map(enum), do: Map.fetch!(enum, key)
+  defp item(enum, index) when is_list(enum), do: Enum.fetch!(enum, index)
+
+  defp escape_path_component(path) when is_integer(path) do
+    path
+    |> to_string()
+    |> escape_path_component()
+  end
+
+  defp escape_path_component(path) when is_binary(path) do
+    case {:binary.match(path, "/"), :binary.match(path, "~")} do
       {:nomatch, :nomatch} ->
         path = Regex.replace(~r/~/, path, "~0")
         Regex.replace(~r/\//, path, "~1")
@@ -65,13 +117,24 @@ defmodule FastJsonDiffEx do
   end
 
   def test() do
-    # a = %{"hello" => "world"}
-    # b = %{"hello" => "world2"}
+    a = %{
+      "firstName" => "Albert",
+      "lastName" => "Einstein",
+      "phoneNumbers" => [
+        %{"number" => "12345"},
+        %{"number" => "45353"}
+      ]
+    }
 
-    a = %{"hello" => ["w", "o", "rld"]}
-    b = %{"hello" => ["w", "o", "rld2"]}
+    b = %{
+      "firstName" => "Joachim",
+      "lastName" => "Wester",
+      "phoneNumbers" => [
+        %{"number" => "123"},
+        %{"number" => "456"}
+      ]
+    }
 
-    compared = generate(a, b)
-    IO.inspect(compared)
+    generate(a, b)
   end
 end
