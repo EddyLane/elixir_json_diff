@@ -16,6 +16,7 @@ defmodule FastJsonDiffEx do
     end)
   end
 
+  @doc false
   defp patches_for_old(old, new, patches, path) do
     old_keys =
       list_or_map_keys_or_indexes(old)
@@ -26,15 +27,18 @@ defmodule FastJsonDiffEx do
     {deleted, patches, old_keys}
   end
 
+  @doc false
   defp old_key_reducer(old, new, path) do
     fn key, {deleted, patches} ->
       old_val = item(old, key)
 
       case has_key_or_index?(new, key) do
+        # The key for the old exists in the new
         true ->
           new_val = item(new, key)
 
           cond do
+            # Both are maps or lists, so we need to recurse to check the child values
             map_or_list?(old_val) and map_or_list?(new_val) ->
               child_patches =
                 generate(
@@ -44,26 +48,32 @@ defmodule FastJsonDiffEx do
                   path_component(path, key)
                 )
 
-              {deleted || false, add_patch(patches, child_patches)}
+              patches = add_patch(patches, child_patches)
+              {deleted || false, patches}
 
+            # No changes, do nothing
             new_val === old_val ->
               {deleted || false, patches}
 
+            # Changes, replace old value with new value
             true ->
-              # Replace value
-              {deleted || false, add_patch(patches, patch(:replace, path, key, new_val))}
+              patches = add_patch(patches, patch(:replace, path, key, new_val))
+              {deleted || false, patches}
           end
 
+        # The key for the old does not exist in the new
         false ->
-          # Remove value
-          {true, add_patch(patches, patch(:remove, path, key))}
+          patches = add_patch(patches, patch(:remove, path, key))
+          {true, patches}
       end
     end
   end
 
+  @doc false
   defp add_patch(patches, new_patches) when is_list(new_patches), do: patches ++ new_patches
   defp add_patch(patches, new_patch), do: patches ++ [new_patch]
 
+  @doc false
   defp has_key_or_index?(map, key) when is_map(map) and is_binary(key) do
     Map.has_key?(map, key)
   end
@@ -74,6 +84,7 @@ defmodule FastJsonDiffEx do
 
   defp has_key_or_index?(_, _), do: false
 
+  @doc false
   defp patch(:add, path, key, val) do
     %{
       "op" => "add",
@@ -97,8 +108,10 @@ defmodule FastJsonDiffEx do
     }
   end
 
+  @doc false
   defp path_component(path, key), do: path <> "/" <> escape_path_component(key)
 
+  @doc false
   defp list_or_map_keys_or_indexes(map) when is_map(map), do: Map.keys(map)
 
   defp list_or_map_keys_or_indexes(list) when is_list(list) do
@@ -106,12 +119,15 @@ defmodule FastJsonDiffEx do
     |> Enum.to_list()
   end
 
+  @doc false
   defp map_or_list?(a) when is_list(a) or is_map(a), do: true
   defp map_or_list?(_), do: false
 
+  @doc false
   defp item(enum, key) when is_map(enum), do: Map.fetch!(enum, key)
   defp item(enum, index) when is_list(enum), do: Enum.fetch!(enum, index)
 
+  @doc false
   def escape_path_component(path) when is_integer(path) do
     path
     |> to_string()
