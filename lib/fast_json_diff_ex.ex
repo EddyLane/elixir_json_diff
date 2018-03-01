@@ -8,19 +8,19 @@ defmodule FastJsonDiffEx do
 
     {deleted, patches} =
       Enum.reduce(old_keys, {false, patches}, fn key, {deleted, patches} ->
-        IO.inspect(key)
-
         old_val = item(old, key)
 
         if has_key_or_index?(new, key) do
           new_val = item(new, key)
 
           if map_or_list?(old_val) and map_or_list?(new_val) do
+            IO.puts("Generating child patches for #{key}")
+
             child_patches =
               generate(
                 old_val,
                 new_val,
-                patches,
+                [],
                 path <> "/" <> escape_path_component(key)
               )
 
@@ -122,7 +122,8 @@ defmodule FastJsonDiffEx do
       "lastName" => "Einstein",
       "phoneNumbers" => [
         %{"number" => "12345"},
-        %{"number" => "45353"}
+        %{"number" => "45353"},
+        %{"number" => "67891"}
       ]
     }
 
@@ -131,7 +132,8 @@ defmodule FastJsonDiffEx do
       "lastName" => "Wester",
       "phoneNumbers" => [
         %{"number" => "123"},
-        %{"number" => "456"}
+        %{"number" => "456"},
+        %{"number" => "678"}
       ]
     }
 
