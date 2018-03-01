@@ -1,0 +1,3 @@
+%{
+  "json_patch": {:hex, :json_patch, "0.8.0", "45c9fdaceb49739af3ab60196e2f2cc89b6e832e1ff2c1accf80432108b86777", [:mix], []},
+}

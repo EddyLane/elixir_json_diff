@@ -72,28 +72,20 @@ function compare(tree1, tree2) {
 
 
 var a = {
-    firstName: 'Albert',
-    lastName: 'Einstein',
-    phoneNumbers: [
-        {
-            number: '12345'
-        },
-        {
-            number: '45353'
-        }
+    "/name/first": 'Albert',
+    "/name/last": "Einstein",
+    "~phone~/numbers": [
+        { number: "12345" },
+        { number: "45353" }
     ]
 }
 
 var b = {
-    firstName: 'Joachim',
-    lastName: 'Wester',
-    phoneNumbers: [
-        {
-            number: '123'
-        },
-        {
-            number: '456'
-        }
+    "/name/first": 'Joachim',
+    "/name/last": "Wester",
+    "~phone~/numbers": [
+        { number: "123" },
+        { number: "456" },
     ]
 }
 

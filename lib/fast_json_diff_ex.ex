@@ -14,8 +14,6 @@ defmodule FastJsonDiffEx do
           new_val = item(new, key)
 
           if map_or_list?(old_val) and map_or_list?(new_val) do
-            IO.puts("Generating child patches for #{key}")
-
             child_patches =
               generate(
                 old_val,
@@ -99,20 +97,20 @@ defmodule FastJsonDiffEx do
   defp item(enum, key) when is_map(enum), do: Map.fetch!(enum, key)
   defp item(enum, index) when is_list(enum), do: Enum.fetch!(enum, index)
 
-  defp escape_path_component(path) when is_integer(path) do
+  def escape_path_component(path) when is_integer(path) do
     path
     |> to_string()
     |> escape_path_component()
   end
 
-  defp escape_path_component(path) when is_binary(path) do
+  def escape_path_component(path) when is_binary(path) do
     case {:binary.match(path, "/"), :binary.match(path, "~")} do
       {:nomatch, :nomatch} ->
-        path = Regex.replace(~r/~/, path, "~0")
-        Regex.replace(~r/\//, path, "~1")
+        path
 
       _ ->
-        path
+        path = Regex.replace(~r/~/, path, "~0")
+        Regex.replace(~r/\//, path, "~1")
     end
   end
 
