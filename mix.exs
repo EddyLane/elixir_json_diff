@@ -6,8 +6,21 @@ defmodule JSONDiff.MixProject do
       app: :json_diff,
       version: "0.1.0",
       elixir: "~> 1.6",
+      package: package(),
       start_permanent: Mix.env() == :prod,
       deps: deps()
+    ]
+  end
+
+  defp package do
+    [
+      files: ["lib", "mix.exs", "README.md"],
+      maintainers: ["Eddy Lane <naedin@gmail.com>"],
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => "https://github.com/EddyLane/elixir_json_diff",
+        "Docs" => "https://hexdocs.pm/json_diff"
+      }
     ]
   end
 
@@ -22,8 +35,6 @@ defmodule JSONDiff.MixProject do
   defp deps do
     [
       {:json_patch, "~> 0.8.0", only: :test}
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]
   end
 end
