@@ -35,6 +35,7 @@ defmodule JSONDiff.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:ex_doc, ">= 0.0.0", only: :dev},
       {:json_patch, "~> 0.8.0", only: :test}
     ]
   end
