@@ -1,9 +1,9 @@
-defmodule FastJsonDiffEx.MixProject do
+defmodule JSONDiff.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :fast_json_diff_ex,
+      app: :json_diff,
       version: "0.1.0",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
@@ -21,7 +21,7 @@ defmodule FastJsonDiffEx.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:json_patch, "~> 0.8.0"}
+      {:json_patch, "~> 0.8.0", only: :test}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]

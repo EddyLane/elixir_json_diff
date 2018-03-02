@@ -1,8 +1,8 @@
-defmodule FastJsonDiffExTest do
+defmodule JSONDiffTest do
   use ExUnit.Case
-  doctest FastJsonDiffEx
+  doctest JSONDiff
 
-  import FastJsonDiffEx
+  import JSONDiff
 
   describe "duplex" do
     test "it should generate replace" do
@@ -39,7 +39,7 @@ defmodule FastJsonDiffExTest do
         %{"op" => "replace", "path" => "/firstName", "value" => "Joachim"}
       ]
 
-      patches = generate(a, b)
+      patches = diff(a, b)
       assert patches == expected_patches
 
       assert {:ok, ^b} = JSONPatch.patch(a, patches)
@@ -79,7 +79,7 @@ defmodule FastJsonDiffExTest do
         %{"op" => "replace", "path" => "/~1name~1first", "value" => "Joachim"}
       ]
 
-      patches = generate(a, b)
+      patches = diff(a, b)
 
       assert patches == expected_patches
       assert {:ok, ^b} = JSONPatch.patch(a, patches)
@@ -90,20 +90,20 @@ defmodule FastJsonDiffExTest do
     a = [1]
     b = [1, 2]
 
-    patches = generate(a, b)
+    patches = diff(a, b)
 
     assert patches == [%{"op" => "add", "path" => "/1", "value" => 2}]
     assert {:ok, ^b} = JSONPatch.patch(a, patches)
 
     c = [3, 2]
 
-    patches = generate(b, c)
+    patches = diff(b, c)
     assert patches == [%{"op" => "replace", "path" => "/0", "value" => 3}]
     assert {:ok, ^c} = JSONPatch.patch(b, patches)
 
     d = [3, 4]
 
-    patches = generate(c, d)
+    patches = diff(c, d)
     assert patches == [%{"op" => "replace", "path" => "/1", "value" => 4}]
     assert {:ok, ^d} = JSONPatch.patch(c, patches)
   end
@@ -125,7 +125,7 @@ defmodule FastJsonDiffExTest do
           }
         ]
 
-    patches = generate(a, b)
+    patches = diff(a, b)
 
     assert patches == [
              %{
@@ -158,7 +158,7 @@ defmodule FastJsonDiffExTest do
       ]
     }
 
-    patches = generate(a, b)
+    patches = diff(a, b)
 
     assert patches == [
              %{"op" => "replace", "path" => "/phoneNumbers/0/number", "value" => "123"},
@@ -187,7 +187,7 @@ defmodule FastJsonDiffExTest do
       ]
     }
 
-    patches = generate(a, b)
+    patches = diff(a, b)
 
     assert patches == [
              %{"op" => "remove", "path" => "/phoneNumbers/1"},
@@ -208,7 +208,7 @@ defmodule FastJsonDiffExTest do
       "items" => ["a"]
     }
 
-    patches = generate(a, b)
+    patches = diff(a, b)
 
     # array indexes must be sorted descending, otherwise there is an index collision in apply
     assert patches == [
