@@ -218,4 +218,22 @@ defmodule JSONDiffTest do
 
     assert {:ok, ^b} = JSONPatch.patch(a, patches)
   end
+
+  test "it should generate add for a list" do
+    a = %{
+      "a" => []
+    }
+
+    b = %{
+      "a" => [1]
+    }
+
+    patches = diff(a, b)
+
+    assert patches == [
+             %{"op" => "add", "path" => "/a/0", "value" => 1}
+           ]
+
+    assert {:ok, ^b} = JSONPatch.patch(a, patches)
+  end
 end

@@ -139,6 +139,8 @@ defmodule JSONDiff do
   @doc false
   defp list_or_map_keys_or_indexes(map) when is_map(map), do: Map.keys(map)
 
+  defp list_or_map_keys_or_indexes([] = list) when is_list(list), do: []
+
   defp list_or_map_keys_or_indexes(list) when is_list(list) do
     0..(length(list) - 1)
     |> Enum.to_list()
@@ -150,6 +152,7 @@ defmodule JSONDiff do
 
   @doc false
   defp item(enum, key) when is_map(enum), do: Map.fetch!(enum, key)
+
   defp item(enum, index) when is_list(enum), do: Enum.fetch!(enum, index)
 
   @doc false

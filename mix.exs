@@ -5,7 +5,7 @@ defmodule JSONDiff.MixProject do
     [
       app: :json_diff,
       description: "An Elixir implementation of the diffing element of JSON Patch (RFC 6902)",
-      version: "0.1.0",
+      version: "0.1.2",
       elixir: "~> 1.6",
       package: package(),
       start_permanent: Mix.env() == :prod,
