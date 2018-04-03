@@ -22,7 +22,7 @@ It is based on the very fast JavaScript library [JSON-Patch](https://github.com/
     # mix.exs
     def deps do
       [
-        {:json_diff, "~> 0.1.0"}
+        {:json_diff, "~> 0.1.2"}
       ]
     end
 
