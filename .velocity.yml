@@ -1,0 +1,5 @@
+project: 
+  logo: //i.imgur.com/MUTLB8Q.png
+  tasksPath: ./tasks
+git: 
+  depth: 10

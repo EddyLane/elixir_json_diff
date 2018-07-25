@@ -1,0 +1,9 @@
+description: "Runs ExUnit tests on this repository"
+name: exunit-test
+
+steps:
+  - type: run
+    description: ExUnit
+    image: elixir:1.6
+    command: /bin/sh -c "mix local.hex --force && mix deps.get && mix test --color"
+    mountPoint: /app
