@@ -236,4 +236,15 @@ defmodule JSONDiffTest do
 
     assert {:ok, ^b} = JSONPatch.patch(a, patches)
   end
+
+  test "it should diff for atom keys" do 
+    a = %{a: 1}
+    b = %{a: 2}
+    
+    patches = diff(a, b)
+    assert patches == [ %{"op" => "replace", "path" => "/a", "value" => 2} ]
+    
+    # When using atom keys, it cannot be patched successfully
+    assert {:error, _error, _desc} = JSONPatch.patch(a, patches)
+  end
 end

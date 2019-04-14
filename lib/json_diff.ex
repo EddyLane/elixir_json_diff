@@ -103,6 +103,10 @@ defmodule JSONDiff do
     Map.has_key?(map, key)
   end
 
+  defp has_key_or_index?(map, key) when is_map(map) and is_atom(key) do
+    Map.has_key?(map, key)
+  end
+
   defp has_key_or_index?(list, index) when is_list(list) and is_integer(index) do
     Enum.at(list, index) != nil
   end
@@ -171,5 +175,9 @@ defmodule JSONDiff do
         path = Regex.replace(~r/~/, path, "~0")
         Regex.replace(~r/\//, path, "~1")
     end
+  end
+
+  def escape_path_component(path) when is_atom(path) do
+    escape_path_component(Atom.to_string(path))
   end
 end
