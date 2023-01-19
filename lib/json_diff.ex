@@ -151,6 +151,9 @@ defmodule JSONDiff do
   end
 
   @doc false
+  defp map_or_list?(%NaiveDateTime{}), do: false
+  defp map_or_list?(%DateTime{}), do: false
+  defp map_or_list?(%Date{}), do: false
   defp map_or_list?(a) when is_list(a) or is_map(a), do: true
   defp map_or_list?(_), do: false
 

@@ -141,6 +141,66 @@ defmodule JSONDiffTest do
     assert {:ok, ^b} = JSONPatch.patch(a, patches)
   end
 
+  test "it should generate replace for NaiveDateTime" do
+    now_a = NaiveDateTime.utc_now()
+    now_b = NaiveDateTime.add(now_a, 1, :minute)
+
+    a = %{"now" => now_a}
+    b = %{"now" => now_b}
+
+    result = [
+      %{
+        "op" => "replace",
+        "path" => "/now",
+        "value" => now_b
+      }
+    ]
+
+    patches = diff(a, b)
+
+    assert patches == result
+  end
+
+  test "it should generate replace for DateTime" do
+    now_a = DateTime.utc_now()
+    now_b = DateTime.add(now_a, 1, :minute)
+
+    a = %{"now" => now_a}
+    b = %{"now" => now_b}
+
+    result = [
+      %{
+        "op" => "replace",
+        "path" => "/now",
+        "value" => now_b
+      }
+    ]
+
+    patches = diff(a, b)
+
+    assert patches == result
+  end
+
+  test "it should generate replace for Date" do
+    now_a = Date.utc_today()
+    now_b = Date.add(now_a, 1)
+
+    a = %{"now" => now_a}
+    b = %{"now" => now_b}
+
+    result = [
+      %{
+        "op" => "replace",
+        "path" => "/now",
+        "value" => now_b
+      }
+    ]
+
+    patches = diff(a, b)
+
+    assert patches == result
+  end
+
   test "it should generate add" do
     a = %{
       "lastName" => "Einstein",
@@ -237,13 +297,13 @@ defmodule JSONDiffTest do
     assert {:ok, ^b} = JSONPatch.patch(a, patches)
   end
 
-  test "it should diff for atom keys" do 
+  test "it should diff for atom keys" do
     a = %{a: 1}
     b = %{a: 2}
-    
+
     patches = diff(a, b)
-    assert patches == [ %{"op" => "replace", "path" => "/a", "value" => 2} ]
-    
+    assert patches == [%{"op" => "replace", "path" => "/a", "value" => 2}]
+
     # When using atom keys, it cannot be patched successfully
     assert {:error, _error, _desc} = JSONPatch.patch(a, patches)
   end
